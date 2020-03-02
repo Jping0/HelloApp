@@ -1,0 +1,189 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>Hello APP</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css" />
+    <style>
+      body{
+        padding: 20px 16px;
+      }
+        label {
+            margin: 10px;
+            font-size: 24px;
+        }
+
+        ul {
+            margin-bottom: 10px;
+        }
+
+        ul li {
+            margin: 5px 10px;
+            padding: 5px;
+            color: #000;
+            word-wrap: break-word;
+        }
+        /*.buttonbox{
+          padding: 0px 16px;
+        }*/
+        .buttonbox div{
+          text-align: center;
+          margin-bottom: 20px;
+          background-color: #609be3;
+          border-radius: 8px;
+          line-height: 50px;
+          color: white;
+        }
+        input{
+          border: 1px solid #609be3;
+          line-height: 50px;
+          width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <label>Hello APP</label>
+    <div id='sys-info'></div>
+    <div class="buttonbox">
+      <div class="btn1">显示弹框按钮</div>
+      <div class="btn2">选择图片按钮</div>
+      <div class="btn3">获取分贝值</div>
+      <div class="btn4">修改屏幕亮度</div>
+      <div class="btn5">开关闪光灯</div>
+    </div>
+    <input type="text" id="db" name="" value="">
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+    function shows(){
+      alert('有反应');
+    }
+    apiready = function() {
+      infos();
+      function infos(){
+        var ver = api.version;
+        var sType = api.systemType;
+        var sVer = api.systemVersion;
+        var id = api.deviceId;
+        var model = api.deviceModel;
+        var name = api.deviceName;
+        var cType = api.connectionType;
+        var winName = api.winName;
+        var winWidth = api.winWidth;
+        var winHeight = api.winHeight;
+        var frameName = api.frameName || '';
+        var frameWidth = api.frameWidth || '';
+        var frameHeight = api.frameHeight || '';
+
+        var str = '<ul>';
+        str += '<li>引擎版本信息: ' + ver + '</li>';
+        str += '<li>系统类型: ' + sType + '</li>';
+        str += '<li>系统版本: ' + sVer + '</li>';
+        str += '<li>设备标识: ' + id + '</li>';
+        str += '<li>设备型号: ' + model + '</li>';
+        str += '<li>设备名称: ' + name + '</li>';
+        str += '<li>网络状态: ' + cType + '</li>';
+        str += '<li>主窗口名字: ' + winName + '</li>';
+        str += '<li>主窗口宽度: ' + winWidth + '</li>';
+        str += '<li>主窗口高度: ' + winHeight + '</li>';
+        str += '<li>子窗口名字: ' + frameName + '</li>';
+        str += '<li>子窗口宽度: ' + frameWidth + '</li>';
+        str += '<li>子窗口高度: ' + frameHeight + '</li>';
+        str += '</ul>';
+
+        $api.byId('sys-info').innerHTML = str;
+      }
+
+
+      var actionButton = api.require('actionButton');
+      $api.addEvt($api.dom('.btn1'), 'click',function(){
+          actionButton.open({
+              items: [{
+                  bgColor: '#00CED1',
+                  title: '标题一'
+              }, {
+                  bgColor: '#00CED1',
+                  title: '标题三'
+              }],
+              bg:'rgb(255,255,255)',
+              topHeight: 20,
+              pageControl: {
+                  activeColor: '#778899',
+                  inactiveColor: '#DDA0DD'
+              },
+              fixedOn: api.frameName
+          }, function(ret, err) {
+              if (ret) {
+                  alert(JSON.stringify(ret));
+              } else {
+                  alert(JSON.stringify(err));
+              }
+          });
+        });
+
+      $api.addEvt($api.dom('.btn2'),'click',function(){
+        api.getPicture({
+            sourceType: 'library',
+            encodingType: 'jpg',
+            mediaValue: 'pic',
+            destinationType: 'url',
+            allowEdit: true,
+            quality: 50,
+            targetWidth: 100,
+            targetHeight: 100,
+            saveToPhotoAlbum: false
+        }, function(ret, err) {
+            if (ret) {
+                alert(JSON.stringify(ret));
+            } else {
+                alert(JSON.stringify(err));
+            }
+        });
+      })
+
+      // 获取分贝值
+      var decibel = api.require('decibel');
+      var dbNum = 0;
+      $api.addEvt($api.dom('.btn3'),'click',function(){
+        ++dbNum;
+        if(dbNum/2==0){
+          decibel.stop();
+        }else{
+          dbfun(dbNum);
+        }
+      })
+      function dbfun(dbNum){
+        decibel.getDecibel({
+            "repeat": true,
+            "interval": 1000
+        }, function(ret){
+          // if(dbNum==1){
+          //   alert(JSON.stringify(ret));
+          // }
+
+          $api.val($api.dom('#db'),ret.dB);
+
+        });
+      }
+
+      // 修改屏幕亮度
+      var brightness = api.require('brightness');
+      $api.addEvt($api.dom('.btn4'),'click',function(){
+        brightness.setBrightness({
+            Brightness: 200
+        });
+      })
+
+      // 开关闪光灯
+      var DVTorch = api.require('DVTorch');
+      $api.addEvt($api.dom('.btn5'),'click',function(){
+        DVTorch.toggle({});
+      })
+    };
+</script>
+
+</html>
